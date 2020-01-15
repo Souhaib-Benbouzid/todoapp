@@ -6,24 +6,60 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Todo App</title>
     <style>
+      #todos {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      } 
       .hidden {
         display: none;
       }
     </style>
   </head>
   <body>
-    <div id="error" class="hidden">Something went wrong!</div>
-    <ul id="todos">
-      {% for d in data %}
-      <i>{{d.description}} </i>
-      {% endfor %}
-    </ul>
+  
     <form id="form">
       <input type="text" name="description" id="description" />
       <input type="submit" name="Create" />
     </form>
 
-    <script>
+    <ul id="todos">
+      {% for d in data %}
+      <li>
+        <input type="checkbox" name="completed" data-id="{{ d.id }}" value="true" class="check-completed" {% if d.completed %} checked {% endif %}> 
+        {{d.description}}
+      </li>
+      {% endfor %}
+    </ul>
+    <div id="error" class="hidden">Something went wrong!</div>
+    
+    <script>      
+      // Update function
+      const checkboxes = document.querySelectorAll('.check-completed');
+      for (let i = 0; i < checkboxes.length; i++) {
+        const checkbox = checkboxes[i];
+        checkbox.onchange = function(e) {
+          const newCompleted = e.target.checked;
+          const todoId = e.target.dataset['id'];
+          fetch('/todos/'+ todoId + '/set-completed',
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                'completed': newCompleted
+              }),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(function() {
+              document.getElementById('error').className = 'hidden';
+            })
+            .catch( function(){
+              document.getElementById("error").className = "";
+            });
+        }
+      }
+      //Create function 
       const inputDesc = document.getElementById("description");
       form = document.getElementById("form");
       form.onsubmit = function(e) {
@@ -49,7 +85,7 @@
           })
           .catch( function(){
             document.getElementById("error").className = "";
-          });
+          })
       };
     </script>
   </body>
