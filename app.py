@@ -18,6 +18,18 @@ class Todo(db.Model):
     def __repr__(self):
         return '<Todo {} {}>'.format(self.id, self.description)
 
+@app.route('/todos/<int:deleted_todo_id>', methods=['DELETE'])
+def delete_todo(deleted_todo_id):
+    try:
+        Todo.query.filter_by(id=deleted_todo_id).delete()
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    return jsonify({ 'success': True })
+
+
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
     error = False
@@ -57,7 +69,6 @@ def set_completed_todo(todo_id):
 def index():
     """Main controller,"""
     return render_template('index.html', data = Todo.query.order_by('id').all())
-
 
 
 if __name__ == "__main__":

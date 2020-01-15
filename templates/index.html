@@ -6,10 +6,20 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Todo App</title>
     <style>
+      .delete-box{
+        -webkit-appearance: none;
+        border: none;
+        outline: none;
+        color: red;
+        float: right;
+        cursor: pointer;
+      }
       #todos {
+        font-size: 1.2rem;
         list-style: none;
         padding: 0;
         margin: 0;
+        width: 200px;
       } 
       .hidden {
         display: none;
@@ -17,7 +27,7 @@
     </style>
   </head>
   <body>
-  
+    
     <form id="form">
       <input type="text" name="description" id="description" />
       <input type="submit" name="Create" />
@@ -28,12 +38,29 @@
       <li>
         <input type="checkbox" name="completed" data-id="{{ d.id }}" value="true" class="check-completed" {% if d.completed %} checked {% endif %}> 
         {{d.description}}
+        <button class="delete-box" data-id="{{d.id}}">&cross;</button>
       </li>
       {% endfor %}
     </ul>
     <div id="error" class="hidden">Something went wrong!</div>
     
-    <script>      
+    <script>
+      // delete function
+      const deleteButtons = document.querySelectorAll('.delete-box');
+      for(let i=0 ; i< deleteButtons.length; i++){
+        const btn = deleteButtons[i];
+        btn.onclick = function(e) {
+          const deleted_todo_id = e.target.dataset['id'];
+          fetch('/todos/'+ deleted_todo_id, {
+            method: 'DELETE'
+          })
+          .then(function(){
+            document.getElementById('error').className = 'hidden';
+            location.reload();
+          })
+          
+        }
+     };
       // Update function
       const checkboxes = document.querySelectorAll('.check-completed');
       for (let i = 0; i < checkboxes.length; i++) {
@@ -58,7 +85,7 @@
               document.getElementById("error").className = "";
             });
         }
-      }
+      };
       //Create function 
       const inputDesc = document.getElementById("description");
       form = document.getElementById("form");
